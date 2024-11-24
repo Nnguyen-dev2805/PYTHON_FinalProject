@@ -6,12 +6,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from plot_utils import industry_highest_revenue, highest_profit_month, favorite_runtime, show_genre_data, calculate_profit, show_top, show_genre_data, show_genres_data
 
-# Biến toàn cục để lưu DataFrame
 df = None
 current_page = 0
-rows_per_page = 1000  # Số dòng mỗi trang
+rows_per_page = 1000  
 
-# Hàm chọn file CSV
 def select_file():
     global df, current_page
     file_path = filedialog.askopenfilename(
@@ -120,13 +118,33 @@ for text, command in buttons:
         frame_left, 
         text=text, 
         command=command, 
-        font=("Pacifico", 13), 
-        width= 39, 
-        bg="#FFCC66", 
+        font=("Pacifico", 12),  
+        width= 40, 
+        bg="#9999CC", 
         borderwidth=2, 
         relief="raised"
     ).pack(pady=7)
 
+
+# Tạo phong cách cho thanh cuộn
+style = ttk.Style()
+style.theme_use('default')  # Sử dụng theme mặc định để tùy chỉnh
+style.configure(
+    "Vertical.TScrollbar",
+    gripcount=0,
+    background="#669999",  # Màu nền của thanh trượt
+    troughcolor="#D3D3D3", # Màu nền của rãnh
+    bordercolor="#AAAAAA", # Màu viền
+    arrowcolor="white"     # Màu mũi tên
+)
+style.configure(
+    "Horizontal.TScrollbar",
+    gripcount=0,
+    background="#669999",  # Màu nền của thanh trượt
+    troughcolor="#D3D3D3", # Màu nền của rãnh
+    bordercolor="#AAAAAA", # Màu viền
+    arrowcolor="white"     # Màu mũi tên
+)
 
 # Tạo bảng Treeview trong frame_right
 columns = ["id", "popularity", "original_title", "cast", "director", "runtime", 
@@ -137,12 +155,23 @@ tree = ttk.Treeview(frame_right, columns=columns, show="headings", height=25)
 # Cấu hình cột
 for col in columns:
     tree.heading(col, text=col, anchor="center")
-    tree.column(col, anchor="center", width=200)
+    if col == 'genres':
+        tree.column(col, anchor="center", width=800)
+    elif col == 'cast' or col == 'production_companies':
+        tree.column(col, anchor="center", width=1200)
+    else:
+        tree.column(col, anchor="center", width=300)
 
-# Thanh cuộn
-scrollbar_y = ttk.Scrollbar(frame_right, orient="vertical", command=tree.yview)
-tree.configure(yscrollcommand=scrollbar_y.set)
+# Tạo thanh cuộn dọc và ngang với phong cách
+scrollbar_y = ttk.Scrollbar(frame_right, orient="vertical", command=tree.yview, style="Vertical.TScrollbar")
+scrollbar_x = ttk.Scrollbar(frame_right, orient="horizontal", command=tree.xview, style="Horizontal.TScrollbar")
+
+# Cấu hình thanh cuộn cho Treeview
+tree.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
+
+# Hiển thị thanh cuộn
 scrollbar_y.pack(side="right", fill="y")
+scrollbar_x.pack(side="bottom", fill="x")
 
 tree.pack(fill="both", expand=True, padx=10, pady=10)
 
