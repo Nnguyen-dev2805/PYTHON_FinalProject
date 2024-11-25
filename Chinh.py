@@ -12,12 +12,10 @@ from plot_utils import (
     show_genres_data,
 )
 
-# Biến toàn cục
 df = None
-original_df = None  # Dữ liệu gốc
+original_df = None 
 current_page = 0
-rows_per_page = 500
-
+rows_per_page = 300
 
 def select_file():
     global df, original_df, current_page, tree
@@ -56,7 +54,16 @@ def create_treeview(dataframe):
     # Đặt cấu hình cột
     for col in columns:
         tree.heading(col, text=col, anchor="center")
-        tree.column(col, anchor="center", width=300)
+        if col == 'cast':
+            tree.column(col, anchor="center", width=1400)    
+        elif col == 'director':
+            tree.column(col, anchor="center", width=600)
+        elif col == 'production_companies':
+            tree.column(col, anchor="center", width=1600)
+        elif col == 'genres':
+            tree.column(col, anchor="center", width=700)
+        else:
+            tree.column(col, anchor="center", width=350)
 
     # Tạo thanh cuộn dọc và ngang
     scrollbar_y = ttk.Scrollbar(frame_right, orient="vertical", command=tree.yview)
@@ -99,7 +106,7 @@ def update_pagination():
             pagination_frame,
             text=f"Trang {i+1}",
             command=lambda page=i: change_page(page),
-            font=("Pacifico", 12),
+            font=("Pacifico", 8),
             width=10,
         )
         page_button.pack(side="left", padx=5)
@@ -124,6 +131,17 @@ def reset_data():
     else:
         messagebox.showerror("Lỗi", "Không có dữ liệu gốc để khôi phục!")
 
+def type_conversion(value, column_series):
+    # Xác định kiểu dữ liệu của cột
+    if column_series.dtype == 'int64':
+        return int(value)
+    elif column_series.dtype == 'float64':
+        return float(value)
+    elif column_series.dtype == 'object':
+        return str(value)
+    else:
+        return value
+
 
 def filter_data():
     global df
@@ -142,9 +160,9 @@ def filter_data():
     try:
         filtered_df = df.copy()
         if condition == "=":
-            filtered_df = filtered_df[filtered_df[column] == value]
+            filtered_df = filtered_df[filtered_df[column] == type_conversion(value, df[column])]
         elif condition == "!=":
-            filtered_df = filtered_df[filtered_df[column] != value]
+            filtered_df = filtered_df[filtered_df[column] != type_conversion(value, df[column])]
         elif condition == ">":
             filtered_df = filtered_df[filtered_df[column].astype(float) > float(value)]
         elif condition == "<":
@@ -161,10 +179,11 @@ def filter_data():
         messagebox.showerror("Lỗi", f"Lọc dữ liệu không thành công: {e}")
 
 
+
 def update_filter_columns():
     if df is not None:
         # Giới hạn cột chỉ hiển thị các cột được chỉ định
-        allowed_columns = ["runtime", "popularity", "vote_count", "vote_average", "release_year", "profit", "revenue_adj", "budget_adj"]
+        allowed_columns = ["runtime", "popularity", "vote_count", "vote_average", "release_year", "profit", "revenue_adj", "budget_adj", "director"]
         available_columns = [col for col in df.columns if col in allowed_columns]
         filter_column_menu["values"] = available_columns
 
@@ -172,8 +191,8 @@ def update_filter_columns():
 
 # Giao diện chính
 root = tk.Tk()
-root.title("Phân tích dữ liệu phim")
-root.geometry("1600x900")
+root.title("   Phân tích dữ liệu phim   ")
+root.geometry("3200x1700")
 root.config(bg="#f0f0f0")
 
 style = ttk.Style()
@@ -208,7 +227,7 @@ frame_left.pack(side="left", fill="y", padx=10, pady=10)
 frame_right = tk.Frame(root, width=300, bg="white")
 frame_right.pack(side="right", fill="both", expand=True, padx=10, pady=10)
 
-tk.Label(frame_left, text="Phân tích dữ liệu phim", font=("Pacifico", 17, "bold"), bg="#CDCDB4", relief="raised").pack(pady=10)
+tk.Label(frame_left, text="   Phân tích dữ liệu phim   ", font=("Pacifico", 17, "bold"), bg="#CDCDB4", relief="raised").pack(pady=10)
 tk.Button(frame_left, text="Chọn file CSV", command=select_file, font=("Pacifico", 15), bg="#669999").pack(pady=10)
 
 pagination_frame = tk.Frame(frame_right, bg="white")
@@ -240,7 +259,7 @@ def edit_selected_row():
         # Mở cửa sổ mới để nhập dữ liệu
         edit_window = Toplevel(root)
         edit_window.title("Chỉnh sửa dữ liệu")
-        edit_window.geometry("400x300")
+        edit_window.geometry("700x700")
 
         # Lấy thông tin dòng hiện tại
         row_index = tree.index(selected_item[0])
@@ -294,7 +313,6 @@ buttons = [
 tk.Button(frame_left, text="Xóa dòng dữ liệu", command=delete_selected_row, font=("Pacifico", 15), bg="#CC6666", borderwidth=2, relief="raised").pack(pady=10)
 tk.Button(frame_left, text="Chỉnh sửa dữ liệu", command=edit_selected_row, font=("Pacifico", 15), bg="#CC9966", borderwidth=2, relief="raised").pack(pady=10)
 
-
 for text, command in buttons:
     tk.Button(
         frame_left, 
@@ -310,26 +328,29 @@ for text, command in buttons:
 # Tạo phong cách cho thanh cuộn
 style = ttk.Style()
 style.theme_use('default')  # Sử dụng theme mặc định để tùy chỉnh
+
 style.configure(
     "Vertical.TScrollbar",
     gripcount=0,
     background="#669999",  # Màu nền của thanh trượt
     troughcolor="#D3D3D3", # Màu nền của rãnh
     bordercolor="#AAAAAA", # Màu viền
-    arrowcolor="white"     # Màu mũi tên
+    arrowcolor="black",     # Màu mũi tên
+    arrowsize = 30
 )
+
 style.configure(
     "Horizontal.TScrollbar",
     gripcount=0,
     background="#669999",  # Màu nền của thanh trượt
     troughcolor="#D3D3D3", # Màu nền của rãnh
     bordercolor="#AAAAAA", # Màu viền
-    arrowcolor="white"     # Màu mũi tên
+    arrowcolor="black",     # Màu mũi tên
+    arrowsize = 30
 )
 
 # Tạo khung phân trang bên dưới bảng
 pagination_frame = tk.Frame(frame_right, bg="white")
 pagination_frame.pack(side="bottom", fill="x", pady=10)
-
 
 root.mainloop()

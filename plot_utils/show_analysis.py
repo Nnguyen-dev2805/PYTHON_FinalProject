@@ -34,7 +34,7 @@ def show_genre_data(df, metric, title):
 def draw_data(df, metric, title):
     df_split = df.assign(genres=df['genres'].str.split('|')).explode('genres')
     genre_data = df_split.groupby('genres')[metric].mean().sort_values(ascending=False)
-    genre_data.plot(kind='barh', figsize=(30, 17), color='skyblue')
+    genre_data.plot(kind='bar', figsize=(30, 17), color='skyblue')
     plt.title(title, size=30)
     plt.xlabel(metric, size=20)
     plt.ylabel('Thể loại', size=20)
@@ -52,7 +52,7 @@ def show_genres_data(df):
 
     all_genres = df['genres'].str.split('|').explode()
     genre_counts = all_genres.value_counts(ascending=False)
-    genre_counts.plot(kind='barh', figsize=(30, 17), color='m', rot=45)
+    genre_counts.plot(kind='bar', figsize=(30, 17), color='m')
     plt.title('Phim theo thể loại, 1960-2015', size=30)
     plt.xlabel('Thể loại', size=20)
     plt.ylabel('Số lần xuất hiện', size=20)

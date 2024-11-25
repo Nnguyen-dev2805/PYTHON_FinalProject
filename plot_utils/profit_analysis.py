@@ -8,20 +8,24 @@ import matplotlib.pyplot as plt
 # chứa các hàm về phân tích lợi nhuận
 
 def calculate_profit(root, df): 
-    """Tính lợi nhuận của bộ phim"""
+    """Tính lợi nhuận của bộ phim và hiển thị biểu đồ"""
     if df is None:
+        from tkinter import messagebox
         messagebox.showerror("Lỗi", "Vui lòng chọn file CSV trước!")
         return
     
+    # Lấy dữ liệu top 10
     result = df.loc[:10, ["original_title", "profit"]]
-    show_result(root, result.to_string(index=False))
-
-def show_result(root, message):
-    result_window = Toplevel(root)
-    result_window.title("Kết quả")
-    result_window.geometry("1000x1000")
-    tk.Label(result_window, bg='white', text=message, font=("Pacifico", 14), wraplength=700, anchor="nw", justify="left").place(x=150, y=150)
-
+    
+    # Vẽ biểu đồ
+    plt.figure(figsize=(10, 6))
+    plt.bar(result["original_title"], result["profit"], color="skyblue")
+    plt.title("Top 10 Bộ Phim và Lợi Nhuận", fontsize=30)
+    plt.xlabel("Tên phim", fontsize=20)
+    plt.ylabel("Lợi nhuận (USD)", fontsize=15)
+    plt.xticks(rotation=45, ha='right', fontsize=15)
+    plt.tight_layout()
+    plt.show()
 
 def industry_highest_revenue(df):
     """Vẽ biểu đồ tổng lợi nhuận theo năm phát hành."""
@@ -31,9 +35,14 @@ def industry_highest_revenue(df):
     
     profit_peryear = df.groupby("release_year")["profit"].sum()
     profit_peryear.plot(kind='bar', figsize=(30, 17), color='skyblue')
-    plt.xlabel("Năm phát hành")
-    plt.ylabel("Tổng lợi nhuận")
-    plt.title("Tổng lợi nhuận từ các bộ phim theo năm")
+    plt.title("Tổng lợi nhuận từ các bộ phim theo năm", size=30)
+    
+    plt.xlabel("Năm phát hành", size=20)
+    plt.ylabel("Tổng lợi nhuận", size=20)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
+    
+    plt.tight_layout()
     plt.show()
 
 def highest_profit_month(df):
@@ -45,8 +54,13 @@ def highest_profit_month(df):
     releasedate_index = df.set_index("release_date")
     profit_permonth = releasedate_index.groupby(releasedate_index.index.month)["profit"].sum()
     sns.barplot(x=profit_permonth.index, y=profit_permonth.values)
-    plt.title("Lợi nhuận thu được từ phim theo tháng")
-    plt.xlabel("Tháng")
-    plt.ylabel("Tổng lợi nhuận")
+    
+    plt.title("Lợi nhuận thu được từ phim theo tháng", size=30)
+    plt.xlabel("Tháng", size=20)
+    plt.ylabel("Tổng lợi nhuận", size=20)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
+
+    plt.tight_layout()
     plt.show()
 
